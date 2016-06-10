@@ -1,27 +1,27 @@
-# This file should contain all the record creation needed to seed the database with its default values.
-# The data can then be loaded with the rake db:seed (or created alongside the db with db:setup).
-#
-# Examples:
-#
-#   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
-#   Mayor.create(name: 'Emanuel', city: cities.first)
+today = Date.today
+two_days_ago = Date.today - 2.days
+three_days_ago = Date.today - 3.days
+dates = [today, two_days_ago, three_days_ago]
 
-TodoList.destroy_all
-Profile.destroy_all
 User.destroy_all
+TodoList.destroy_all
 
-Profile.create! [
-	{first_name: 'Carly', last_name:'Fiorina', birth_year:1954, gender:'female'},
-	{first_name: 'Donald', last_name:'Trump', birth_year:1946, gender:'male'},
-	{first_name: 'Ben', last_name:'Carson', birth_year:1951, gender:'male'},
-	{first_name: 'Hillary', last_name:'Clinton', birth_year:1947, gender:'female'}
+100.times { |index| TodoList.create! list_name: "List #{index}", list_due_date: dates.sample }
+
+TodoList.all.each do |list|
+  list.todo_items.create! [
+    { title: "Task 1", due_date: dates.sample, description: "very important task TEST", completed: false },
+    { title: "Task 2", due_date: dates.sample, description: "do something else TEST", completed: true},
+    { title: "Task 3", due_date: dates.sample, description: "learn Action Pack TEST", completed: true}
+  ]
+end
+
+users = User.create! [
+  { username: "jim", password: "abc123" },
+  { username: "rich", password: "123abc" }
 ]
 
-Profile.all.each do |profile|
-	user = profile.create_user!(username:"#{profile.last_name}", password_digest:"#{profile.first_name.downcase}")
-	user.todo_lists << TodoList.create(list_name:"#{profile.first_name}'s list", list_due_date:(Date.today+1.year))
-	(0...5).each do |i|
-		user.todo_lists.first.todo_items << TodoItem.create(due_date:(Date.today+1.year), 
-								title:"#{profile.first_name}'s item number #{i}", description:"description for item number #{i}", completed:false)
-	end
+TodoList.all.each do |list|
+  list.user = users.sample
+  list.save!
 end
